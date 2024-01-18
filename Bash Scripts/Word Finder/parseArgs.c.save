@@ -1,0 +1,34 @@
+#include <stdio.h>
+#include "myStrings.h"
+#include "parseArgs.h"
+
+int iWord=-1, iFileName=-1;
+
+/**
+ * print the usage message
+ */
+void usage(){
+
+	// YOUR CODE GOES HERE
+	
+	
+}
+
+/**
+ * print error message to stderr
+ */
+void optionsError(char mesg[]){
+	fprintf(stderr, "hasWord: %s\nTry 'hasWord --help' for more information.\n", mesg);
+}
+
+/**
+ * parse and understand the args. 
+ * returns 1 for success, 0 for error, 2 for --help printed
+ * On success, iWord, iFileName are all properly initialized
+ * iFileName == -1 indicates read from stdin
+ */
+int parseArgs(int argc, char *argv[]){
+
+	// YOUR CODE GOES HERE
+	
+}

@@ -1,0 +1,154 @@
+#!/bin/bash
+# The following goes first, so we can refer back the directory containing these scripts.
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+QUESTION_DIR="$HOME/csc209_23s_a1q1"
+DB_DIR="$QUESTION_DIR/database"
+PHOTOS_DIR="$DB_DIR/photos"
+
+if [[ ! -d running ]]
+then
+	mkdir running
+else
+	exit 1
+fi
+
+# if $1 is -v then set FLAG to 1. If it is not then the command is not verbose (FLAG = 0).
+FLAG=0
+# Argument validity checking
+if [[ $# == 0 ]]
+then
+	echo "addPhotos: unrecognized option" >&2
+	echo "Try addPhotos --help for more information" >&2
+	exit 1
+elif [[ $# == 1 ]] && [[ $1 == "-v" ]]
+then
+	echo "addPhotos: unrecognized option" >&2
+        echo "Try addPhotos --help for more information" >&2
+	exit 1
+elif [[ $# == 1 ]] && [[ $1 == "--help" ]]
+then
+	echo "addPhoto help"
+	echo "addPhotos dir1 [dir2] ... [dirn]"
+	echo "adds all non-duplicate files in directories into $PHOTOS_DIR"
+	echo "addPhotos --help"
+	echo "displays usage message"
+	echo "addPhotos -v dir1 [dir2] ... [dirn]"
+	echo "prints verbose output, identifying the fate of each file in directories"
+	exit 0
+else
+	if [[ $1 == "-v" ]]
+	then
+		FLAG=1
+		args="${@:2}"
+	else
+		args="$@"
+	fi
+	# $1 == help with args.
+	# check if all other arguments are directories :)
+	for var in $args
+		do
+			if [[ ! -d $var ]]
+			then
+				echo "addPhotos: unrecognized option" >&2
+        			echo "Try addPhotos --help for more information" >&2
+				exit 1
+			fi
+		shift
+	done
+fi
+
+shift
+if [[ $FLAG == 1 ]]
+then
+	shift
+fi
+
+for var in $args
+do
+	# goes through all files in [dir#]
+	cd "$var"
+	for f1 in *
+	do
+		if [[ -f $f1 ]]
+		then
+			# If filename is in PHOTOS_DIR then check if the contents are the same as that file.
+			# If the contents are the same, do not add (make duplicate for V). If contents are not 
+			# the same then add with a new file name. (copied for v)
+			cd "$PHOTOS_DIR"
+			if [[ -a $f1 ]]
+			then
+				SAME1=0
+				for file in *
+				do
+					cd "$SCRIPT_DIR"
+					if cmp --silent "$PHOTOS_DIR/$file" "$var/$f1"
+					then
+						if [[ $FLAG == 1 ]]
+						then
+							echo "duplicateImage $f1"
+						fi
+						SAME1=1
+					fi
+					if [[ $SAME1 == 1 ]]
+					then
+						break
+					fi
+				done
+				if [[ $SAME1 == 0 ]]
+				then
+                                        # make new name
+					cd "$PHOTOS_DIR"
+                                        F="$(tr -dc a-z </dev/urandom | head -c 14)"
+                                        while [[ -a $F ]]
+                                        do
+                                        	F="$(tr -dc a-z </dev/urandom | head -c 14)"
+                                        done
+
+                                        if [[ $FLAG == 1 ]]
+                                        then
+                                        	echo "copied $f1"
+					fi
+                                        # copy file with new name :)
+                                        cd "$SCRIPT_DIR"
+                                        mv "$var/$f1" "$F"
+                                        cp "$F" "$PHOTOS_DIR"
+					mv "$F" "$var/$f1"
+				fi
+			else
+			# if filename is not in PHOTOS_DIR then check if the contents are the same with ANY file in
+			# PHOTOS_DIR. if they are the same then do not add (duplicate for V). If they are not the same
+			# then add it with the name of the current file (copied for v).
+				SAME2=0
+				for f2 in *
+				do
+					cd "$SCRIPT_DIR"
+					if cmp --silent "$var/$f1" "$PHOTOS_DIR/$f2"
+					then
+						if [[ $FLAG == 1 ]]
+						then
+							echo "duplicateImage $f1"
+						fi
+						SAME2=1
+					fi
+					if [[ $SAME2 == 1 ]]
+					then
+						break
+					fi
+				done
+				if [[ $SAME2 == 0 ]]
+				then
+                                	if [[ $FLAG == 1 ]]
+                                        then
+                                        	echo "copied $f1"
+                                        fi
+                                        cd "$SCRIPT_DIR"
+                                        cp "$var/$f1" "$PHOTOS_DIR"
+				fi
+			fi
+			cd "$var"
+		fi
+	done
+done
+rm -d "$SCRIPT_DIR/running"
+exit 0

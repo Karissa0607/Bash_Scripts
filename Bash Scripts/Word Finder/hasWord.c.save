@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "myStrings.h"
+#include "parseArgs.h"
+
+/**
+ * return whether word appears in open fpin
+ */
+int isWordInFile(char word[], int wordLen, FILE *fpin){
+
+	// YOUR CODE GOES HERE
+
+}
+
+
+int main(int argc, char *argv[]) {
+	FILE *fpin; 
+	int retVal=parseArgs(argc, argv);
+
+	// YOUR CODE GOES HERE
+	if (retVal == 0) {
+		optionsError("incorrect number of arguments");
+		return 127;
+	} else if (retVal == 1) {
+		// make a copy of the word
+		char word[];
+		for (int i =0; i < argc; i++) {
+			*(word + i) = *((argv + iWord) + i);
+		};
+		char word = (char) *(argv + iWord);
+		if (iFileName == -1) {
+			char c;
+			int final = 0;
+			while ((c = fgetc(stdin)) != EOF) {
+				int f = 1;
+				while (*word != '\0' && *c != '\0') {
+					if (*word != *c) {
+						f = 0;
+					};
+				 c++;
+					word++;
+				};
+				if (f) {
+					final = 1;
+				};
+			};
+			if (final) {
+				return 0;
+			} else {
+				return 1;
+			};
+		} else {
+			int len = 0;
+			while (*word != '0') {
+				len++;
+				word++;
+			};
+			fpin = *(argv + iFileName);
+			int newRetVal = isWordInFile(*(argv + iWord), len, fpin);
+		}
+	} else {
+		// is usage message already displayed??
+		return 0;
+	}
+}
